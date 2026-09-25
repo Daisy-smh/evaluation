@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Demo - Rotating Cube</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #1a1a2e; }
+    canvas { display: block; }
+    #info {
+      position: absolute;
+      top: 12px; left: 12px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 14px;
+      text-shadow: 0 1px 3px rgba(0,0,0,.8);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">Demo: 旋转立方体 — 方向键/WASD 可移动</div>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a2e);
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 1.5, 5);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    document.body.appendChild(renderer.domElement);
+
+    // 立方体
+    const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+    const material = new THREE.MeshPhongMaterial({ color: 0x00ff88, shininess: 120 });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+
+    // 地面网格
+    const grid = new THREE.GridHelper(20, 20, 0x444466, 0x2a2a44);
+    grid.position.y = -1.2;
+    scene.add(grid);
+
+    // 灯光
+    scene.add(new THREE.AmbientLight(0x404060, 2.5));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+    dirLight.position.set(5, 8, 5);
+    scene.add(dirLight);
+
+    // 键盘控制
+    const keys = {};
+    window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.015;
+
+      const speed = 0.06;
+      if (keys['ArrowRight'] || keys['KeyD']) cube.position.x += speed;
+      if (keys['ArrowLeft'] || keys['KeyA']) cube.position.x -= speed;
+      if (keys['ArrowUp'] || keys['KeyW']) cube.position.y += speed;
+      if (keys['ArrowDown'] || keys['KeyS']) cube.position.y -= speed;
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
